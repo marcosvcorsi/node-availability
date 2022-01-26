@@ -9,3 +9,13 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Availability {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  startTime DateTime @db.Time()
+  endTime   DateTime @db.Time()
+  timeZone  String   @default("America/New_York")
+}
