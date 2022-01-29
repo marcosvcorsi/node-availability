@@ -20,15 +20,34 @@ const prismaClient = new PrismaClient();
 app.post("/", async (req, res) => {
   const { startTime, endTime, timeZone } = req.body;
 
-  const availability = await prismaClient.availability.create({
-    data: {
-      endTime,
-      startTime,
-      timeZone,
-    },
-  });
+  const existingAvailability = await prismaClient.availability.findFirst();
 
-  return res.status(201).json(availability);
+  let availability;
+
+  if (!existingAvailability) {
+    availability = await prismaClient.availability.create({
+      data: {
+        endTime,
+        startTime,
+        timeZone,
+      },
+    });
+
+    return res.status(201).json(availability);
+  } else {
+    availability = await prismaClient.availability.update({
+      data: {
+        endTime,
+        startTime,
+        timeZone,
+      },
+      where: {
+        id: existingAvailability.id,
+      },
+    });
+
+    return res.status(200).json(availability);
+  }
 });
 
 const setDateHours = (dateString: string, dateTime: Date): Date => {
