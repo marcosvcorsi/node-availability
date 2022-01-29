@@ -31,13 +31,27 @@ app.post("/", async (req, res) => {
   return res.status(201).json(availability);
 });
 
+const setDateHours = (dateString: string, dateTime: Date): Date => {
+  return dayjs(dateString)
+    .set("hour", dateTime.getHours())
+    .set("minute", dateTime.getMinutes())
+    .toDate();
+};
+
+const getUtcDate = (date: Date, timeZone: string): Date => {
+  const utcOffset = dayjs().tz(timeZone).utcOffset();
+
+  const minutes =
+    dayjs.utc(date).get("hours") * 60 +
+    dayjs.utc(date).get("minutes") -
+    utcOffset;
+
+  return dayjs.utc(date).startOf("day").add(minutes, "minute").toDate();
+};
+
 app.get("/", async (req, res) => {
   const timeZone = (req.query.timeZone ?? "America/New_York") as string;
   const date = (req.query.date ?? "2022-01-28") as string;
-
-  const utcOffset = dayjs().tz(timeZone).utcOffset();
-
-  console.log({ utcOffset, timeZone });
 
   const availability = await prismaClient.availability.findFirst();
 
@@ -45,24 +59,19 @@ app.get("/", async (req, res) => {
     return res.status(400).json({ message: "There is no availability" });
   }
 
-  const startDateTime = dayjs(date)
-    .set("hour", availability.startTime.getHours())
-    .set("minute", availability.startTime.getMinutes())
-    .toDate();
+  const startTime = setDateHours(date, availability.startTime);
+  const endTime = setDateHours(date, availability.endTime);
 
-  const endDateTime = dayjs(date)
-    .set("hour", availability.endTime.getHours())
-    .set("minute", availability.endTime.getMinutes())
-    .toDate();
+  const startTimeUtc = getUtcDate(startTime, timeZone);
+  const endTimeUtc = getUtcDate(endTime, timeZone);
 
-  console.log({ startDateTime, endDateTime });
-
-  const startTime = dayjs.tz(startDateTime).tz(timeZone, true).utc().format();
-  const endTime = dayjs.tz(endDateTime, timeZone).utc().format();
-
-  console.log({ startTime, endTime });
-
-  return res.json({ startTime, endTime, timeZone });
+  return res.json({
+    startTime,
+    endTime,
+    timeZone,
+    startTimeUtc,
+    endTimeUtc,
+  });
 });
 
 app.listen(3000, () => console.log("Server is running"));
