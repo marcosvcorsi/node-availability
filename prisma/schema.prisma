@@ -18,4 +18,5 @@ model Availability {
   startTime DateTime @db.Time()
   endTime   DateTime @db.Time()
   timeZone  String   @default("America/New_York")
+  date      DateTime @default(now()) @db.Timestamptz()
 }
