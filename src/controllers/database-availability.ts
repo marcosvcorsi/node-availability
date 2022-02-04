@@ -3,7 +3,7 @@ import dayjsUtc from "dayjs/plugin/utc";
 import dayjsTimezone from "dayjs/plugin/timezone";
 import { Request, Response } from "express";
 import { Knex } from "knex";
-import { getUtcDate, setDate } from "../utils/date";
+import { getUtcDate } from "../utils/date";
 
 dayjs.extend(dayjsUtc);
 dayjs.extend(dayjsTimezone);
@@ -56,7 +56,7 @@ export class DatabaseAvailabilityController {
       )
       .first();
 
-    console.log(availability);
+    console.log("availability", availability);
 
     if (!availability) {
       return response.status(400).json({ message: "There is no availability" });
@@ -66,8 +66,11 @@ export class DatabaseAvailabilityController {
     // const endDateTime = setDate(date, availability.endDateTime);
 
     return response.json({
-      startDateTime: null,
-      endDateTime: null,
+      // startDateTime: new Date(availability.startDateTime),
+      // endDateTime: new Date(availability.endDateTime),
+
+      startDateTime: dayjs.tz(availability.startDateTime, timeZone).format(),
+      endDateTime: dayjs.tz(availability.endDateTime, timeZone).format(),
       timeZone,
     });
   }
