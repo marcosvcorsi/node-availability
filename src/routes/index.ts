@@ -1,23 +1,37 @@
 import { Router } from "express";
-import { AvailabilityController } from "../controllers/availability";
+import { CalendsoAvailabilityController } from "../controllers/calendso-availability";
+import { DatabaseAvailabilityController } from "../controllers/database-availability";
 import { connection } from "../database/knex";
 import { prismaClient } from "../database/prisma";
 
 const routes = Router();
 
-const availabilityController = new AvailabilityController(
-  prismaClient,
+const calendsoAvailabilityController = new CalendsoAvailabilityController(
+  prismaClient
+);
+
+const databaseAvailabilityController = new DatabaseAvailabilityController(
   connection
 );
 
 routes.get(
-  "/availability",
-  availabilityController.find.bind(availabilityController)
+  "/calendso/availability",
+  calendsoAvailabilityController.find.bind(calendsoAvailabilityController)
 );
 
 routes.post(
-  "/availability",
-  availabilityController.save.bind(availabilityController)
+  "/calendso/availability",
+  calendsoAvailabilityController.save.bind(calendsoAvailabilityController)
+);
+
+routes.get(
+  "/database/availability",
+  databaseAvailabilityController.find.bind(databaseAvailabilityController)
+);
+
+routes.post(
+  "/database/availability",
+  databaseAvailabilityController.save.bind(databaseAvailabilityController)
 );
 
 export { routes };

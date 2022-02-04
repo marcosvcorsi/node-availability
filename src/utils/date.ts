@@ -14,6 +14,14 @@ export const setDateHours = (dateString: string, dateTime: Date): Date => {
     .toDate();
 };
 
+export const setDate = (dateString: string, date: Date): Date => {
+  return dayjs(dateString)
+    .set("year", date.getFullYear())
+    .set("month", date.getMonth())
+    .set("date", date.getDate())
+    .toDate();
+};
+
 export const getUtcDate = (date: Date, timeZone: string): Date => {
   const utcOffset = dayjs().tz(timeZone).utcOffset();
 
