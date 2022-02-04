@@ -1,0 +1,9 @@
+Query:
+
+SELECT 
+	a."startDateTime" at TIME zone 'America/Sao_Paulo' as "startTime",
+	a."endDateTime" at TIME zone 'America/Sao_Paulo' as "endTime"  
+FROM "Availability" a
+
+
+Link: https://stackoverflow.com/questions/51082774/knex-silently-converts-postgres-timestamps-with-timezone-and-returns-incorrect-t

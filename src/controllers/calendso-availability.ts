@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import dayjs from "dayjs";
 import { Request, Response } from "express";
 import { getUtcDate, setDateHours } from "../utils/date";
 
@@ -40,8 +41,8 @@ export class CalendsoAvailabilityController {
   }
 
   async find(request: Request, response: Response): Promise<Response> {
-    const timeZone = (request.query.timeZone ?? "America/New_York") as string;
-    const date = (request.query.date ?? "2022-01-28") as string;
+    const timeZone = (request.query.timeZone ?? "America/Sao_Paulo") as string;
+    const date = (request.query.date ?? dayjs().format("YYYY-MM-DD")) as string;
 
     const availability = await this.prismaClient.availability.findFirst();
 

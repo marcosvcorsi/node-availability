@@ -1,7 +1,12 @@
-import { Availability } from "@prisma/client";
+import dayjs from "dayjs";
+import dayjsUtc from "dayjs/plugin/utc";
+import dayjsTimezone from "dayjs/plugin/timezone";
 import { Request, Response } from "express";
 import { Knex } from "knex";
-import { getUtcDate, setDate, setDateHours } from "../utils/date";
+import { getUtcDate, setDate } from "../utils/date";
+
+dayjs.extend(dayjsUtc);
+dayjs.extend(dayjsTimezone);
 
 export class DatabaseAvailabilityController {
   constructor(private readonly connection: Knex) {}
@@ -14,8 +19,8 @@ export class DatabaseAvailabilityController {
     if (!existingAvailability) {
       const results = await this.connection()
         .insert({
-          startDateTime,
-          endDateTime,
+          startDateTime: getUtcDate(new Date(startDateTime), timeZone),
+          endDateTime: getUtcDate(new Date(endDateTime), timeZone),
           timeZone,
         })
         .into("Availability")
@@ -26,8 +31,8 @@ export class DatabaseAvailabilityController {
       const results = await this.connection("Availability")
         .where({ id: existingAvailability.id })
         .update({
-          startDateTime,
-          endDateTime,
+          startDateTime: dayjs(startDateTime).tz(timeZone).toDate(),
+          endDateTime: dayjs(endDateTime).tz(timeZone).toDate(),
           timeZone,
         })
         .returning("*");
@@ -37,21 +42,32 @@ export class DatabaseAvailabilityController {
   }
 
   async find(request: Request, response: Response): Promise<Response> {
-    const timeZone = (request.query.timeZone ?? "America/New_York") as string;
-    const date = (request.query.date ?? "2022-01-28") as string;
+    const timeZone = (request.query.timeZone ?? "America/Sao_Paulo") as string;
+    const date = (request.query.date ?? dayjs().format("YYYY-MM-DD")) as string;
 
-    const availability = await this.connection("Availability").first();
+    const availability = await this.connection("Availability")
+      .select(
+        this.connection.raw(
+          `"startDateTime" at time zone '${timeZone}' as "startDateTime"`
+        ),
+        this.connection.raw(
+          `"endDateTime" at time zone '${timeZone}' as  "endDateTime"`
+        )
+      )
+      .first();
+
+    console.log(availability);
 
     if (!availability) {
       return response.status(400).json({ message: "There is no availability" });
     }
 
-    const startDateTime = setDate(date, availability.startDateTime);
-    const endDateTime = setDate(date, availability.endDateTime);
+    // const startDateTime = setDate(date, availability.startDateTime);
+    // const endDateTime = setDate(date, availability.endDateTime);
 
     return response.json({
-      startDateTime,
-      endDateTime,
+      startDateTime: null,
+      endDateTime: null,
       timeZone,
     });
   }
