@@ -37,7 +37,7 @@ export class DatabaseAvailabilityController {
         })
         .returning("*");
 
-      return response.status(200).json(results[0]);
+      return response.json(results[0]);
     }
   }
 
@@ -55,8 +55,6 @@ export class DatabaseAvailabilityController {
         )
       )
       .first();
-
-    console.log("availability", availability);
 
     if (!availability) {
       return response.status(400).json({ message: "There is no availability" });

@@ -36,7 +36,7 @@ export class CalendsoAvailabilityController {
         },
       });
 
-      return response.status(200).json(availability);
+      return response.json(availability);
     }
   }
 
