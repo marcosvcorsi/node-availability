@@ -15,9 +15,18 @@ model Availability {
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
 
-  startTime     DateTime  @db.Time()
-  endTime       DateTime  @db.Time()
-  timeZone      String    @default("America/New_York")
-  startDateTime DateTime? @db.Timestamptz()
-  endDateTime   DateTime? @db.Timestamptz()
+  startTime   DateTime  @db.Time()
+  endTime     DateTime  @db.Time()
+  timeZone    String    @default("America/New_York")
+  startTimeTz DateTime? @db.Timetz()
+  endTImeTz   DateTime? @db.Timetz()
+}
+
+model Booking {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  startTime DateTime
+  endTime   DateTime
 }
