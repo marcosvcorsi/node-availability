@@ -19,7 +19,7 @@ model Availability {
   endTime     DateTime  @db.Time()
   timeZone    String    @default("America/New_York")
   startTimeTz DateTime? @db.Timetz()
-  endTImeTz   DateTime? @db.Timetz()
+  endTimeTz   DateTime? @db.Timetz()
 }
 
 model Booking {

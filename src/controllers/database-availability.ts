@@ -12,17 +12,23 @@ export class DatabaseAvailabilityController {
   constructor(private readonly connection: Knex) {}
 
   async save(request: Request, response: Response): Promise<Response> {
-    const { startDateTime, endDateTime, timeZone } = request.body;
+    const { startTimeTz, endTimeTz, timeZone } = request.body;
 
     const existingAvailability = await this.connection("Availability").first();
 
+    const data = {
+      startTimeTz: dayjs(getUtcDate(new Date(startTimeTz), timeZone)).format(
+        "HH:mm:ss"
+      ),
+      endTimeTz: dayjs(getUtcDate(new Date(endTimeTz), timeZone)).format(
+        "HH:mm:ss"
+      ),
+      timeZone,
+    };
+
     if (!existingAvailability) {
       const results = await this.connection()
-        .insert({
-          startDateTime: getUtcDate(new Date(startDateTime), timeZone),
-          endDateTime: getUtcDate(new Date(endDateTime), timeZone),
-          timeZone,
-        })
+        .insert(data)
         .into("Availability")
         .returning("*");
 
@@ -30,11 +36,7 @@ export class DatabaseAvailabilityController {
     } else {
       const results = await this.connection("Availability")
         .where({ id: existingAvailability.id })
-        .update({
-          startDateTime: dayjs(startDateTime).tz(timeZone).toDate(),
-          endDateTime: dayjs(endDateTime).tz(timeZone).toDate(),
-          timeZone,
-        })
+        .update(data)
         .returning("*");
 
       return response.json(results[0]);
@@ -46,29 +48,16 @@ export class DatabaseAvailabilityController {
     const date = (request.query.date ?? dayjs().format("YYYY-MM-DD")) as string;
 
     const availability = await this.connection("Availability")
-      .select(
-        this.connection.raw(
-          `"startDateTime" at time zone '${timeZone}' as "startDateTime"`
-        ),
-        this.connection.raw(
-          `"endDateTime" at time zone '${timeZone}' as  "endDateTime"`
-        )
-      )
+      .select("startTimeTz", "endTimeTz", "timeZone")
       .first();
 
     if (!availability) {
       return response.status(400).json({ message: "There is no availability" });
     }
 
-    // const startDateTime = setDate(date, availability.startDateTime);
-    // const endDateTime = setDate(date, availability.endDateTime);
-
     return response.json({
-      // startDateTime: new Date(availability.startDateTime),
-      // endDateTime: new Date(availability.endDateTime),
-
-      startDateTime: dayjs.tz(availability.startDateTime, timeZone).format(),
-      endDateTime: dayjs.tz(availability.endDateTime, timeZone).format(),
+      startTimeTz: dayjs(`${date} ${availability.startTimeTz}`).toDate(),
+      endTimeTz: dayjs(`${date} ${availability.endTimeTz}`).toDate(),
       timeZone,
     });
   }
