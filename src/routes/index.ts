@@ -20,6 +20,11 @@ routes.get(
   calendsoAvailabilityController.find.bind(calendsoAvailabilityController)
 );
 
+routes.get(
+  "/calendso/openings",
+  calendsoAvailabilityController.openings.bind(calendsoAvailabilityController)
+);
+
 routes.post(
   "/calendso/availability",
   calendsoAvailabilityController.save.bind(calendsoAvailabilityController)

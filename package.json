@@ -23,6 +23,7 @@
   "dependencies": {
     "@prisma/client": "^3.8.1",
     "cors": "^2.8.5",
+    "date-fns": "^2.28.0",
     "dayjs": "^1.10.7",
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
